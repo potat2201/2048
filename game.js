@@ -25,6 +25,10 @@ const overlay = document.getElementById("overlay");
 const overlayMessage = document.getElementById("overlay-message");
 const newGameBtn = document.getElementById("new-game");
 const tryAgainBtn = document.getElementById("try-again");
+const boardWrap = document.querySelector(".board-wrap");
+const scoresPanel = document.getElementById("scores-panel");
+const viewScoresBtn = document.getElementById("view-scores-btn");
+const closeScoresBtn = document.getElementById("close-scores-btn");
 
 let grid = [];
 let score = 0;
@@ -401,6 +405,24 @@ function startGame() {
   renderTiles();
 }
 
+function isMobileLayout() {
+  return window.matchMedia("(max-width: 600px)").matches;
+}
+
+function openScoresPanel() {
+  if (!scoresPanel || !isMobileLayout()) return;
+  scoresPanel.classList.add("open");
+  scoresPanel.setAttribute("aria-hidden", "false");
+  document.body.classList.add("scores-panel-open");
+}
+
+function closeScoresPanel() {
+  if (!scoresPanel) return;
+  scoresPanel.classList.remove("open");
+  scoresPanel.setAttribute("aria-hidden", isMobileLayout() ? "true" : "false");
+  document.body.classList.remove("scores-panel-open");
+}
+
 function handleKey(event) {
   const target = event.target;
   if (
@@ -408,6 +430,10 @@ function handleKey(event) {
     target instanceof HTMLTextAreaElement ||
     target.isContentEditable
   ) {
+    return;
+  }
+
+  if (document.body.classList.contains("scores-panel-open")) {
     return;
   }
 
@@ -451,17 +477,37 @@ function handleTouchEnd(event) {
 
 function handleNewGame() {
   submitRun();
+  closeScoresPanel();
   startGame();
 }
 
 tryAgainBtn.addEventListener("click", handleNewGame);
 newGameBtn.addEventListener("click", handleNewGame);
+viewScoresBtn?.addEventListener("click", openScoresPanel);
+closeScoresBtn?.addEventListener("click", closeScoresPanel);
 document.addEventListener("keydown", handleKey);
-document.addEventListener("touchstart", handleTouchStart, { passive: true });
-document.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+if (boardWrap) {
+  boardWrap.addEventListener("touchstart", handleTouchStart, { passive: true });
+  boardWrap.addEventListener("touchend", handleTouchEnd, { passive: true });
+  boardWrap.addEventListener(
+    "touchmove",
+    (event) => {
+      event.preventDefault();
+    },
+    { passive: false }
+  );
+}
 window.addEventListener("resize", () => {
   measureBoard();
   renderTiles();
+  if (!scoresPanel) return;
+  if (!isMobileLayout()) {
+    closeScoresPanel();
+    scoresPanel.setAttribute("aria-hidden", "false");
+  } else if (!scoresPanel.classList.contains("open")) {
+    scoresPanel.setAttribute("aria-hidden", "true");
+  }
 });
 
 overlay.addEventListener("click", (event) => {
@@ -473,6 +519,12 @@ overlay.addEventListener("click", (event) => {
 
 initBackground();
 bestScoreEl.textContent = bestScore;
+if (scoresPanel) {
+  scoresPanel.setAttribute(
+    "aria-hidden",
+    isMobileLayout() ? "true" : "false"
+  );
+}
 renderLeaderboard512();
 renderLeaderboard();
 startGame();

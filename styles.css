@@ -321,6 +321,7 @@ body {
   border-radius: 10px;
   background: var(--board);
   box-shadow: var(--shadow);
+  touch-action: none;
 }
 
 .grid-background,
@@ -487,6 +488,34 @@ body {
   opacity: 0.85;
 }
 
+.hint-mobile {
+  display: none;
+}
+
+.view-scores-btn,
+.scores-panel-header {
+  display: none;
+}
+
+.btn-compact {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.scores-panel-heading {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.scores-panel-header {
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 kbd {
   display: inline-block;
   padding: 2px 6px;
@@ -497,13 +526,126 @@ kbd {
 }
 
 @media (max-width: 600px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    align-items: stretch;
+    padding: 0;
+  }
+
   .layout {
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    max-width: none;
   }
 
-  .milestone-board {
-    width: var(--size);
+  .app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: var(--size);
+    min-height: 0;
+    padding: 12px 16px 0;
+    overflow: hidden;
+  }
+
+  .header {
+    margin-bottom: 12px;
+  }
+
+  .title-block h1 {
+    font-size: 3rem;
+  }
+
+  .controls {
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    margin: 10px 0 0;
+    font-size: 0.85rem;
+  }
+
+  .hint-desktop {
+    display: none;
+  }
+
+  .hint-mobile {
+    display: inline;
+  }
+
+  .view-scores-btn {
+    display: block;
+    width: 100%;
+    margin-top: auto;
+    margin-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+  }
+
+  .scores-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    width: 100%;
+    max-width: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top, 16px));
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: none;
+  }
+
+  .scores-panel.open {
+    display: block;
+  }
+
+  .scores-panel .milestone-title,
+  .scores-panel .leaderboard-title {
+    color: var(--text);
+  }
+
+  .scores-panel .milestone-subtitle,
+  .scores-panel .leaderboard-subtitle {
+    color: var(--text);
+    opacity: 0.75;
+  }
+
+  .scores-panel .milestone-row,
+  .scores-panel .leaderboard-row {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .scores-panel .milestone-time.milestone-hit,
+  .scores-panel .leaderboard-time {
+    color: var(--text);
+  }
+
+  .scores-panel-header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-bottom: 12px;
+    background: var(--bg);
   }
 }
 

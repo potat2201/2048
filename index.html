@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>2048</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -53,11 +56,31 @@
       </div>
 
       <p class="hint">
-        Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or swipe to move tiles.
+        <span class="hint-desktop"
+          >Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or swipe to move
+          tiles.</span
+        >
+        <span class="hint-mobile">Swipe on the board to move tiles.</span>
       </p>
+
+      <button type="button" id="view-scores-btn" class="btn view-scores-btn">
+        Scores &amp; leaderboards
+      </button>
     </div>
 
-    <aside class="milestone-board" aria-label="Milestone times">
+    <aside
+      id="scores-panel"
+      class="milestone-board scores-panel"
+      aria-label="Milestone times and leaderboards"
+      aria-hidden="true"
+    >
+      <div class="scores-panel-header">
+        <h2 class="scores-panel-heading">Scores &amp; leaderboards</h2>
+        <button type="button" id="close-scores-btn" class="btn btn-compact">
+          Back to game
+        </button>
+      </div>
+
       <h2 class="milestone-title">Milestones</h2>
       <p class="milestone-subtitle">Time to first tile</p>
       <ul class="milestone-list" id="milestone-list">
