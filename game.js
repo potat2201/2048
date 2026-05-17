@@ -1,6 +1,7 @@
 const SIZE = 4;
 const BEST_KEY = "2048-best-score";
 const LEADERBOARD_KEY = "2048-leaderboard";
+const LEADERBOARD_512_KEY = "2048-leaderboard-512";
 const WIN_VALUE = 2048;
 const MILESTONES = [128, 256, 512, 1024, 2048];
 const MAX_LEADERBOARD = 3;
@@ -11,6 +12,7 @@ const bestScoreEl = document.getElementById("best-score");
 const playerNameInput = document.getElementById("player-name");
 const currentPlayerEl = document.getElementById("current-player");
 const leaderboardListEl = document.getElementById("leaderboard-list");
+const leaderboard512ListEl = document.getElementById("leaderboard-512-list");
 const milestoneTimeEls = Object.fromEntries(
   MILESTONES.map((value) => [
     value,
@@ -147,42 +149,35 @@ function updateCurrentPlayerDisplay() {
   currentPlayerEl.hidden = false;
 }
 
-function loadLeaderboard() {
+function loadLeaderboardEntries(storageKey) {
   try {
-    const data = JSON.parse(localStorage.getItem(LEADERBOARD_KEY));
+    const data = JSON.parse(localStorage.getItem(storageKey));
     return Array.isArray(data) ? data : [];
   } catch {
     return [];
   }
 }
 
-function saveLeaderboard(entries) {
-  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries));
+function saveLeaderboardEntries(storageKey, entries) {
+  localStorage.setItem(storageKey, JSON.stringify(entries));
 }
 
-function submitRun() {
-  if (runSubmitted) return;
-  const time2048 = milestoneTimes[2048];
-  if (time2048 == null) return;
-
-  runSubmitted = true;
-  const entries = loadLeaderboard();
+function pushLeaderboardEntry(storageKey, timeField, timeMs, name) {
+  const entries = loadLeaderboardEntries(storageKey);
   entries.push({
-    name: currentPlayerName,
-    time2048,
+    name,
+    [timeField]: timeMs,
     score,
     date: Date.now(),
   });
-  entries.sort((a, b) => a.time2048 - b.time2048);
-  saveLeaderboard(entries.slice(0, MAX_LEADERBOARD));
-  renderLeaderboard();
+  entries.sort((a, b) => a[timeField] - b[timeField]);
+  saveLeaderboardEntries(storageKey, entries.slice(0, MAX_LEADERBOARD));
 }
 
-function renderLeaderboard() {
-  if (!leaderboardListEl) return;
+function renderLeaderboardList(listEl, entries, timeField) {
+  if (!listEl) return;
 
-  const entries = loadLeaderboard();
-  leaderboardListEl.innerHTML = "";
+  listEl.innerHTML = "";
 
   for (let i = 0; i < MAX_LEADERBOARD; i++) {
     const entry = entries[i];
@@ -202,11 +197,47 @@ function renderLeaderboard() {
 
     const time = document.createElement("span");
     time.className = "leaderboard-time";
-    time.textContent = entry ? formatElapsed(entry.time2048) : "—";
+    time.textContent = entry ? formatElapsed(entry[timeField]) : "—";
 
     info.append(name, time);
     li.append(rank, info);
-    leaderboardListEl.appendChild(li);
+    listEl.appendChild(li);
+  }
+}
+
+function renderLeaderboard512() {
+  renderLeaderboardList(
+    leaderboard512ListEl,
+    loadLeaderboardEntries(LEADERBOARD_512_KEY),
+    "time512"
+  );
+}
+
+function renderLeaderboard() {
+  renderLeaderboardList(
+    leaderboardListEl,
+    loadLeaderboardEntries(LEADERBOARD_KEY),
+    "time2048"
+  );
+}
+
+function submitRun() {
+  if (runSubmitted) return;
+
+  const time512 = milestoneTimes[512];
+  const time2048 = milestoneTimes[2048];
+  if (time512 == null && time2048 == null) return;
+
+  runSubmitted = true;
+  const name = getPlayerName();
+
+  if (time512 != null) {
+    pushLeaderboardEntry(LEADERBOARD_512_KEY, "time512", time512, name);
+    renderLeaderboard512();
+  }
+  if (time2048 != null) {
+    pushLeaderboardEntry(LEADERBOARD_KEY, "time2048", time2048, name);
+    renderLeaderboard();
   }
 }
 
@@ -418,8 +449,13 @@ function handleTouchEnd(event) {
   else move(dy > 0 ? "down" : "up");
 }
 
-tryAgainBtn.addEventListener("click", startGame);
-newGameBtn.addEventListener("click", startGame);
+function handleNewGame() {
+  submitRun();
+  startGame();
+}
+
+tryAgainBtn.addEventListener("click", handleNewGame);
+newGameBtn.addEventListener("click", handleNewGame);
 document.addEventListener("keydown", handleKey);
 document.addEventListener("touchstart", handleTouchStart, { passive: true });
 document.addEventListener("touchend", handleTouchEnd, { passive: true });
@@ -437,5 +473,6 @@ overlay.addEventListener("click", (event) => {
 
 initBackground();
 bestScoreEl.textContent = bestScore;
+renderLeaderboard512();
 renderLeaderboard();
 startGame();
