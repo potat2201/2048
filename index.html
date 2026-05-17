@@ -27,8 +27,19 @@
       </header>
 
       <div class="controls">
+        <label class="name-field" for="player-name">
+          <span class="name-label">Name</span>
+          <input
+            id="player-name"
+            type="text"
+            placeholder="Your name"
+            maxlength="16"
+            autocomplete="nickname"
+          />
+        </label>
         <button id="new-game" type="button" class="btn">New Game</button>
       </div>
+      <p id="current-player" class="current-player" hidden></p>
 
       <div class="board-wrap">
         <div id="grid-background" class="grid-background"></div>
@@ -71,6 +82,12 @@
           <span class="milestone-time" data-milestone="2048">—</span>
         </li>
       </ul>
+
+      <section class="leaderboard" aria-label="Top performers">
+        <h2 class="leaderboard-title">Top 3</h2>
+        <p class="leaderboard-subtitle">Fastest to 2048</p>
+        <ol id="leaderboard-list" class="leaderboard-list"></ol>
+      </section>
     </aside>
     </div>
 

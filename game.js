@@ -1,10 +1,16 @@
 const SIZE = 4;
 const BEST_KEY = "2048-best-score";
+const LEADERBOARD_KEY = "2048-leaderboard";
 const WIN_VALUE = 2048;
 const MILESTONES = [128, 256, 512, 1024, 2048];
+const MAX_LEADERBOARD = 3;
+const DEFAULT_NAME = "Player";
 
 const scoreEl = document.getElementById("score");
 const bestScoreEl = document.getElementById("best-score");
+const playerNameInput = document.getElementById("player-name");
+const currentPlayerEl = document.getElementById("current-player");
+const leaderboardListEl = document.getElementById("leaderboard-list");
 const milestoneTimeEls = Object.fromEntries(
   MILESTONES.map((value) => [
     value,
@@ -27,6 +33,8 @@ let cellSize = 0;
 let gap = 12;
 let gameStartTime = 0;
 let milestoneTimes = {};
+let currentPlayerName = DEFAULT_NAME;
+let runSubmitted = false;
 
 function createEmptyGrid() {
   return Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
@@ -125,6 +133,80 @@ function checkMilestones() {
       el.textContent = formatElapsed(elapsed);
       el.classList.add("milestone-hit");
     }
+  }
+}
+
+function getPlayerName() {
+  const name = playerNameInput?.value.trim();
+  return name || DEFAULT_NAME;
+}
+
+function updateCurrentPlayerDisplay() {
+  if (!currentPlayerEl) return;
+  currentPlayerEl.textContent = `Playing as ${currentPlayerName}`;
+  currentPlayerEl.hidden = false;
+}
+
+function loadLeaderboard() {
+  try {
+    const data = JSON.parse(localStorage.getItem(LEADERBOARD_KEY));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLeaderboard(entries) {
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries));
+}
+
+function submitRun() {
+  if (runSubmitted) return;
+  const time2048 = milestoneTimes[2048];
+  if (time2048 == null) return;
+
+  runSubmitted = true;
+  const entries = loadLeaderboard();
+  entries.push({
+    name: currentPlayerName,
+    time2048,
+    score,
+    date: Date.now(),
+  });
+  entries.sort((a, b) => a.time2048 - b.time2048);
+  saveLeaderboard(entries.slice(0, MAX_LEADERBOARD));
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  if (!leaderboardListEl) return;
+
+  const entries = loadLeaderboard();
+  leaderboardListEl.innerHTML = "";
+
+  for (let i = 0; i < MAX_LEADERBOARD; i++) {
+    const entry = entries[i];
+    const li = document.createElement("li");
+    li.className = "leaderboard-row";
+
+    const rank = document.createElement("span");
+    rank.className = "leaderboard-rank";
+    rank.textContent = `${i + 1}`;
+
+    const info = document.createElement("div");
+    info.className = "leaderboard-info";
+
+    const name = document.createElement("span");
+    name.className = "leaderboard-name";
+    name.textContent = entry?.name ?? "—";
+
+    const time = document.createElement("span");
+    time.className = "leaderboard-time";
+    time.textContent = entry ? formatElapsed(entry.time2048) : "—";
+
+    info.append(name, time);
+    li.append(rank, info);
+    leaderboardListEl.appendChild(li);
   }
 }
 
@@ -256,19 +338,28 @@ function hideOverlay() {
 function checkGameState() {
   if (!hasWon && !keepPlaying && hasWinningTile()) {
     hasWon = true;
+    submitRun();
     showOverlay("You win!");
     return;
   }
   if (!canMove()) {
+    submitRun();
     showOverlay("Game over!");
   }
 }
 
 function startGame() {
+  currentPlayerName = getPlayerName();
+  if (playerNameInput) {
+    playerNameInput.value = currentPlayerName;
+  }
+  updateCurrentPlayerDisplay();
+
   grid = createEmptyGrid();
   score = 0;
   hasWon = false;
   keepPlaying = false;
+  runSubmitted = false;
   hideOverlay();
   resetMilestones();
   gameStartTime = Date.now();
@@ -337,4 +428,5 @@ overlay.addEventListener("click", (event) => {
 
 initBackground();
 bestScoreEl.textContent = bestScore;
+renderLeaderboard();
 startGame();
