@@ -371,6 +371,15 @@ function startGame() {
 }
 
 function handleKey(event) {
+  const target = event.target;
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target.isContentEditable
+  ) {
+    return;
+  }
+
   const map = {
     ArrowLeft: "left",
     ArrowRight: "right",
