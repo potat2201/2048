@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2048</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="title-block">
+          <h1>2048</h1>
+          <p class="subtitle">Join tiles, reach 2048!</p>
+        </div>
+        <div class="scores">
+          <div class="score-box">
+            <span class="score-label">Score</span>
+            <span id="score" class="score-value">0</span>
+          </div>
+          <div class="score-box">
+            <span class="score-label">Best</span>
+            <span id="best-score" class="score-value">0</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="controls">
+        <button id="new-game" type="button" class="btn">New Game</button>
+      </div>
+
+      <div class="board-wrap">
+        <div id="grid-background" class="grid-background"></div>
+        <div id="tile-container" class="tile-container"></div>
+        <div id="overlay" class="overlay hidden" aria-hidden="true">
+          <div class="overlay-card">
+            <p id="overlay-message" class="overlay-message"></p>
+            <button id="try-again" type="button" class="btn">Try Again</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">
+        Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or swipe to move tiles.
+      </p>
+    </div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
