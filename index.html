@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="layout">
     <div class="app">
       <header class="header">
         <div class="title-block">
@@ -43,6 +44,34 @@
       <p class="hint">
         Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or swipe to move tiles.
       </p>
+    </div>
+
+    <aside class="milestone-board" aria-label="Milestone times">
+      <h2 class="milestone-title">Milestones</h2>
+      <p class="milestone-subtitle">Time to first tile</p>
+      <ul class="milestone-list" id="milestone-list">
+        <li class="milestone-row" data-value="128">
+          <span class="milestone-label tile-128">128</span>
+          <span class="milestone-time" data-milestone="128">—</span>
+        </li>
+        <li class="milestone-row" data-value="256">
+          <span class="milestone-label tile-256">256</span>
+          <span class="milestone-time" data-milestone="256">—</span>
+        </li>
+        <li class="milestone-row" data-value="512">
+          <span class="milestone-label tile-512">512</span>
+          <span class="milestone-time" data-milestone="512">—</span>
+        </li>
+        <li class="milestone-row" data-value="1024">
+          <span class="milestone-label tile-1024">1024</span>
+          <span class="milestone-time" data-milestone="1024">—</span>
+        </li>
+        <li class="milestone-row" data-value="2048">
+          <span class="milestone-label tile-2048">2048</span>
+          <span class="milestone-time" data-milestone="2048">—</span>
+        </li>
+      </ul>
+    </aside>
     </div>
 
     <script src="game.js"></script>

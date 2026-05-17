@@ -1,9 +1,16 @@
 const SIZE = 4;
 const BEST_KEY = "2048-best-score";
 const WIN_VALUE = 2048;
+const MILESTONES = [128, 256, 512, 1024, 2048];
 
 const scoreEl = document.getElementById("score");
 const bestScoreEl = document.getElementById("best-score");
+const milestoneTimeEls = Object.fromEntries(
+  MILESTONES.map((value) => [
+    value,
+    document.querySelector(`[data-milestone="${value}"]`),
+  ])
+);
 const gridBackground = document.getElementById("grid-background");
 const tileContainer = document.getElementById("tile-container");
 const overlay = document.getElementById("overlay");
@@ -18,6 +25,8 @@ let hasWon = false;
 let keepPlaying = false;
 let cellSize = 0;
 let gap = 12;
+let gameStartTime = 0;
+let milestoneTimes = {};
 
 function createEmptyGrid() {
   return Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
@@ -81,6 +90,42 @@ function updateScoreDisplay() {
     localStorage.setItem(BEST_KEY, String(bestScore));
   }
   bestScoreEl.textContent = bestScore;
+}
+
+function formatElapsed(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  if (min > 0) {
+    return `${min}:${String(sec).padStart(2, "0")}`;
+  }
+  return `${totalSec}s`;
+}
+
+function resetMilestones() {
+  milestoneTimes = {};
+  for (const value of MILESTONES) {
+    if (milestoneTimeEls[value]) {
+      milestoneTimeEls[value].textContent = "—";
+      milestoneTimeEls[value].classList.remove("milestone-hit");
+    }
+  }
+}
+
+function checkMilestones() {
+  const elapsed = Date.now() - gameStartTime;
+  for (const value of MILESTONES) {
+    if (milestoneTimes[value] != null) continue;
+    const found = grid.some((row) => row.some((cell) => cell === value));
+    if (!found) continue;
+
+    milestoneTimes[value] = elapsed;
+    const el = milestoneTimeEls[value];
+    if (el) {
+      el.textContent = formatElapsed(elapsed);
+      el.classList.add("milestone-hit");
+    }
+  }
 }
 
 function emptyCells() {
@@ -168,12 +213,15 @@ function move(direction) {
   score += gained;
   updateScoreDisplay();
 
+  checkMilestones();
+
   const spawned = addRandomTile();
   measureBoard();
   const anims = {};
   if (spawned) anims[`${spawned.r}-${spawned.c}`] = { isNew: true };
   renderTiles(anims);
 
+  checkMilestones();
   checkGameState();
   return true;
 }
@@ -222,6 +270,8 @@ function startGame() {
   hasWon = false;
   keepPlaying = false;
   hideOverlay();
+  resetMilestones();
+  gameStartTime = Date.now();
   updateScoreDisplay();
   addRandomTile();
   addRandomTile();
